@@ -4,11 +4,11 @@ code of static camera functionalities
 ### Init dir includes executable files to start up theasis system.
 Open up a terminal and type:
 
-1i) ./start_docker&hotspot.sh - to start mongodb, memcached, docker and create Theasis hotspot
-1ii) web_browser --> http://localhost:1234
-2) ./start_theasisApp.sh - to start Node.js server application
-3) ./start_websocket.sh - to run websocket_client
-4) ./start_cam_algo.sh - to run algorithm for smoke/fire detection from static camera and drone thermal camera stream
+1) ./start_docker&hotspot.sh - to start mongodb, memcached, docker and create Theasis hotspot
+2) web_browser --> http://localhost:1234
+3) ./start_theasisApp.sh - to start Node.js server application
+4) ./start_websocket.sh - to run websocket_client
+5) ./start_cam_algo.sh - to run algorithm for smoke/fire detection from static camera and drone thermal camera stream
 
 ### image_processing dir includes python files of Smoke Detection algorithm
 
