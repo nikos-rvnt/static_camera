@@ -11,8 +11,8 @@ def StaticScan():
 	camPositions = list(range(52,-80,-5)) + list(range(-80,52,5))
 	camPositions = camPositions = [ camPositions[i]%360 for i in range(len(camPositions)) ]
 	camPos_indx = 0
-	# cam_thrm = cv.VideoCapture("rtsp://192.168.2.233:8555/video1")
-	cam_thrm = cv.VideoCapture(0)
+	cam_thrm = cv.VideoCapture("rtsp://192.168.2.233:8555/video1")
+	#cam_thrm = cv.VideoCapture(0)
 	Tonbo = TonboCamera.Tonbo()
 	
 	NumFramesPerPosition = 300
@@ -36,6 +36,7 @@ def StaticScan():
 				# Stop Scanning
 				return True, Lat, Long
 	
+	cam_thrm.release()
 	# if break while loop
 	return False, -1, -1
 
@@ -59,6 +60,7 @@ def UAVScan():
 			print("Validated...")
 			return True, latQuad, longQuad
 	
+	cam_quad.release()
 	# if break while loop
 	return False, -1, -1
 
@@ -81,8 +83,7 @@ def checkIfDroneIsHome():
 
 
 if __name__ == '__main__':
-
-
+    
 
 	while 1:
 
