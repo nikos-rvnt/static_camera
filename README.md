@@ -22,6 +22,17 @@ Open up a terminal and type:
 - validateAlarm(): to validate an alarm 
 - getQuadCoords(): to get current (with a small latency) quadcopter latitude, longitude 
 
+### TonboCamera.py contains Tonbo class with all necessary static camera functionalities
+
+- setZoom()/getZoom(): sets/returns the zoom level 
+- setGain()/getGain(): sets/returns the gain level
+- setBrightness()/getBrightness(): sets/returns the brightness level
+- setPanPos()/getPanPos(): sets/returns the pan position, that is the camera rotation angle from the zero position
+- setTiltPos()/getTilePos(): sets/returns the tilt position, that is the camera upside down angle 
+- setZeroPos(): sets the initial position of the camera (getPanPos() on zero position will return 0 angle)
+- getCoordinates(): returns the target (possible fire/smoke pixels) coordinates given the estimated distance and the camera pan position
+
+
 ### To check if image signal is properly transmitted via ffplay:
 
  Tonbo Static Camera:
