@@ -10,7 +10,7 @@ Open up a terminal and type:
 4) ./start_websocket.sh - to run websocket_client
 5) ./start_cam_algo.sh - to run algorithm for smoke/fire detection from static camera and drone thermal camera stream
 
-( if any of the above is not executable, you can force it to be, typing "sudo chmod +777 /path/to/file.extension" )
+( if any of the above is not executable, you can force it to be by typing "sudo chmod +777 /path/to/file.extension" )
 
 ### image_processing dir includes python files of Smoke Detection algorithm
 
