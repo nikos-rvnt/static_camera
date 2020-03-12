@@ -10,6 +10,8 @@ Open up a terminal and type:
 4) ./start_websocket.sh - to run websocket_client
 5) ./start_cam_algo.sh - to run algorithm for smoke/fire detection from static camera and drone thermal camera stream
 
+( if any of the above is not executable, you can force it to be, typing "sudo chmod +777 /path/to/file.extension" )
+
 ### image_processing dir includes python files of Smoke Detection algorithm
 
 - Subsense.py
@@ -31,16 +33,13 @@ Open up a terminal and type:
 - setTiltPos()/getTilePos(): sets/returns the tilt position, that is the camera upside down angle 
 - setZeroPos(): sets the initial position of the camera (getPanPos() on zero position will return 0 angle)
 - getCoordinates(): returns the target (possible fire/smoke pixels) coordinates given the estimated distance and the camera pan position
+- imCoords2angles(): computes the pan, tilt angles of the target 
 
-
-### To check if image signal is properly transmitted via ffplay:
+### To check via ffplay if image signal is properly transmitted:
 
  Tonbo Static Camera:
   - (optical cam): ffplay "rtsp://192.168.2.233:8554/video0"
   - (thermal cam): ffplay "rtsp://192.168.2.233:8555/video1"
 
- DJI Quadcopter (only thermal camera signal is transmitted):
+ DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
   - ffplay "rtmp://127.0.0.1:1935/live/quad" 
-  
-  
-  
