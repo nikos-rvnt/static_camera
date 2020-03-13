@@ -23,15 +23,19 @@ def StaticScan():
 		camPos_indx = (camPos_indx + 1) % len(camPositions)
 		time.sleep(1)
 		Tonbo.setTiltPos(5)
-		time.sleep(10)
+		time.sleep(3)
 		
 		for i in range(NumFramesPerPosition):
 			retThrm, frameThrm = cam_thrm.read()
-			check = np.sum(frameThrm[50:500,50:650,:] > 250)
+			check = np.sum(frameThrm[50:500,50:650] > 250)
 			
 			if check > 15:
 				# Fire Detected From Thermal Camera
-				Lat, Long = Tonbo.getCoordinates(1, Tonbo.getPanPos())
+				FOVTHERMAL = 10
+				indcs = np.argwhere( frmThrm[frmThrm.shape[0]//2,50:650] > 250 )
+				columnMedian = indcs[indcs.shape[0]//2][0]
+				Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
+				#Lat, Long = Tonbo.getCoordinates(1, Tonbo.getPanPos())
 				print("Fire.............")
 				# Stop Scanning
 				return True, Lat, Long
@@ -73,7 +77,7 @@ def checkIfDroneIsHome():
 	droneCurrentCoords = alarmRequests.getQuadCoords()
 	droneCurrentCoords[0] = float(droneCurrentCoords[0])
 	droneCurrentCoords[1] = float(droneCurrentCoords[1])
-	if np.abs(droneHomeCoords[0] - droneCurrentCoords[0])<0.00001 and if np.abs(droneHomeCoords[1] - droneCurrentCoords[1])<0.00001:
+	if np.abs(droneHomeCoords[0] - droneCurrentCoords[0])<0.00001 and np.abs(droneHomeCoords[1] - droneCurrentCoords[1])<0.00001:
 		isDroneHome = True
 	else:  
 		isDroneHome = False
@@ -85,19 +89,19 @@ def checkIfDroneIsHome():
 if __name__ == '__main__':
     
 
-	while 1:
+	#while 1:
 
-		FireDetected, Lat, Long = StaticScan()
+	FireDetected, Lat, Long = StaticScan()
 
-		if FireDetected and checkIfDroneIsHome():
+	if FireDetected and checkIfDroneIsHome():
 
-			alarmRequests.newAlarm( Lat, Long)
-			time.sleep(5)
-			FireValidated, latQuad, longQuad = UAVScan()
-			if FireValidated:
-				alarmRequests.validateAlarm( latQuad, longQuad)
-			else:
-				print("Not Validated")
-			alarmRequests.deleteAlarm()
+		alarmRequests.newAlarm( Lat, Long)
+		time.sleep(5)
+		FireValidated, latQuad, longQuad = UAVScan()
+		if FireValidated:
+			alarmRequests.validateAlarm( latQuad, longQuad)
+		else:
+			print("Not Validated")
+		alarmRequests.deleteAlarm()
 
 

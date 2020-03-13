@@ -13,8 +13,8 @@ class Tonbo():
 				Latitude =  38.101849, Longitude =  21.345674):
 		
 		#self.setThermalZoom(Zoom)
-		self.setThermalBrightness(0x62) # brghtns
-		self.setThermalGain(0x62) # highest gain contrast
+		self.setThermalBrightness(0x7) # brghtns
+		self.setThermalGain(0x0) # highest gain contrast
 		#self.setThermalFocusFar()
 		
 		self.initTheta = initTheta
