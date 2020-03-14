@@ -8,7 +8,7 @@ import alarmRequests
 
 def StaticScan():
 
-	camPositions = list(range(52,-80,-5)) + list(range(-80,52,5))
+	camPositions = list(range( 52, 0,-5)) + list(range(360-5,280,-5)) + list(range(285,360,5)) + list(range(5,52,5))
 	camPositions = camPositions = [ camPositions[i]%360 for i in range(len(camPositions)) ]
 	camPos_indx = 0
 	cam_thrm = cv.VideoCapture("rtsp://192.168.2.233:8555/video1")
@@ -34,6 +34,9 @@ def StaticScan():
 				FOVTHERMAL = 10
 				indcs = np.argwhere( frmThrm[frmThrm.shape[0]//2,50:650] > 250 )
 				columnMedian = indcs[indcs.shape[0]//2][0]
+				
+				
+				
 				Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
 				#Lat, Long = Tonbo.getCoordinates(1, Tonbo.getPanPos())
 				print("Fire.............")
@@ -60,13 +63,14 @@ def UAVScan():
 			quadCoords = alarmRequests.getQuadCoords()
 			latQuad = float(quadCoords[0])
 			longQuad = float(quadCoords[1])
+			absAltQuad = float(quadCoords[2])
 			cv.imwrite( '/home/theasis/software/static_cam/fireFrame.jpg', frmQuad)
 			print("Validated...")
-			return True, latQuad, longQuad
+			return True, latQuad, longQuad, absAltQuad
 	
 	cam_quad.release()
 	# if break while loop
-	return False, -1, -1
+	return False, -1, -1, -1
 
 
 def checkIfDroneIsHome():
@@ -77,6 +81,7 @@ def checkIfDroneIsHome():
 	droneCurrentCoords = alarmRequests.getQuadCoords()
 	droneCurrentCoords[0] = float(droneCurrentCoords[0])
 	droneCurrentCoords[1] = float(droneCurrentCoords[1])
+	droneCurrentCoords[2] = float(droneCurrentCoords[2])
 	if np.abs(droneHomeCoords[0] - droneCurrentCoords[0])<0.00001 and np.abs(droneHomeCoords[1] - droneCurrentCoords[1])<0.00001:
 		isDroneHome = True
 	else:  
@@ -97,9 +102,11 @@ if __name__ == '__main__':
 
 		alarmRequests.newAlarm( Lat, Long)
 		time.sleep(5)
-		FireValidated, latQuad, longQuad = UAVScan()
+		FireValidated, latQuad, longQuad, absAltQuad = UAVScan()
 		if FireValidated:
 			alarmRequests.validateAlarm( latQuad, longQuad)
+			worstErr = coordsError.coordsError( absAltQuad, 45*np.pi/180)
+			print("Worst estimated error - X:" + str(worstErr[0]) + " Y: " + str(worstErr[1]))
 		else:
 			print("Not Validated")
 		alarmRequests.deleteAlarm()
