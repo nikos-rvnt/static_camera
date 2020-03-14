@@ -50,3 +50,7 @@ Open up a terminal and type:
 
  DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
   - ffplay "rtmp://127.0.0.1:1935/live/quad" 
+  
+### To record via ffmpeg quadcopter stream:
+
+    ffmpeg -i rtmp://127.0.0.1:1935/live/quad -vcodec copy -acodec copy -strftime 1 "%Y-%m-%d_%H-%M-%S_quadStream.jpg"
