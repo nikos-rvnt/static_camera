@@ -53,4 +53,4 @@ Open up a terminal and type:
   
 ### To record via ffmpeg quadcopter stream:
 
-    ffmpeg -i rtmp://127.0.0.1:1935/live/quad -vcodec copy -acodec copy -strftime 1 "%Y-%m-%d_%H-%M-%S_quadStream.jpg"
+    ffmpeg -i rtmp://198.162.2.100:1935/live/quad -vcodec copy -acodec copy -strftime 1 "%Y-%m-%d_%H-%M-%S_quadStream.jpg"
