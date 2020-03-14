@@ -32,13 +32,26 @@ def StaticScan():
 			if check > 15:
 				# Fire Detected From Thermal Camera
 				FOVTHERMAL = 10
-				indcs = np.argwhere( frmThrm[frmThrm.shape[0]//2,50:650] > 250 )
+				indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
 				columnMedian = indcs[indcs.shape[0]//2][0]
 				
+				while np.abs(columnMedian[0] - frameThrm.shape[0]//2)>20:
+					if columnMedian[0] - frameThrm.shape[0]//2>0:
+						Tonbo.setTiltPos( Tonbo.getTiltPos() - 1 )
+					else:
+						Tonbo.setTiltPos( Tonbo.getTiltPos() + 1 )
 				
+				while np.abs(columnMedian[1] - frameThrm.shape[1]//2)>20:
+					if columnMedian[1] - frameThrm.shape[1]//2>0:
+						Tonbo.setPanPos( (Tonbo.getPanPos() - 1)%360 )
+					else:
+						Tonbo.setPanPos( (Tonbo.getPanPos() + 1)%360 )
 				
-				Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
-				#Lat, Long = Tonbo.getCoordinates(1, Tonbo.getPanPos())
+				indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
+				columnMedian = indcs[indcs.shape[0]//2][0]
+				
+				#Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
+				Lat, Long = Tonbo.getCoordinates( 1, Tonbo.getPanPos())
 				print("Fire.............")
 				# Stop Scanning
 				return True, Lat, Long
