@@ -66,7 +66,7 @@ if __name__ == '__main__':
         columnMedian = [indcs[len(indcs)//2][0],indcs[len(indcs)//2][1]]
         
         #cam_thrm.release()
-        while np.abs(columnMedian[0] - 288)>35:
+        while np.abs(columnMedian[0] - 288)>15 and np.abs(columnMedian[1] - frameThrm.shape[1])>15:
             
             print(columnMedian[0] - frameThrm.shape[0]//2)
             print('aaaa')
@@ -82,20 +82,31 @@ if __name__ == '__main__':
             
             print(columnMedian)
             print(np.median(indcs, axis = 0)[0])
-            if (columnMedian[0] - 288)>35:
+            if (columnMedian[0] - 288)>15 :
                 print('bbbb')              
                 whichTilt = tonby.getTiltPos()
                 tonby.setTiltPos( whichTilt + .5 )
-                time.sleep(5)
+                time.sleep(.05)
                 tonby.stopAllAction()
-            elif (columnMedian[0] - 288)<-35: 
+            elif (columnMedian[0] - 288)<-15 : 
                 print('ccc') 
                 whichTilt = tonby.getTiltPos()
                 tonby.setTiltPos( whichTilt - .5 )  
-                time.sleep(5)
-                
-            else: 
-                break
+                time.sleep(.05)
+            
+            if (columnMedian[1] - frameThrm.shape[1]//2)>15 :
+                print('bbbb')              
+                whichPan = tonby.getPanPos()
+                tonby.setPanPos( whichPan - .5 )
+                time.sleep(.05)
+                tonby.stopAllAction()
+            elif (columnMedian[1] - frameThrm.shape[1]//2)<-15 : 
+                print('ccc') 
+                whichPan = tonby.getPanPos()
+                tonby.setPanPos( whichPan + .5 )  
+                time.sleep(.05)
+
+            
             
             tonby.stopAllAction()
             #cam_thrm.release()
