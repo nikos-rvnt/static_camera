@@ -53,7 +53,7 @@ if __name__ == '__main__':
     #cam_thrm.set(cv.CAP_PROP_BUFFERSIZE, 0)
     frameThrm = cam_thrm.read()
     
-    check = np.sum( frameThrm[ :, :, 0] > 55 )
+    check = np.sum( frameThrm[ :, :, 0] > 60 )
     #cv.imshow('frm',frameThrm[:,:,0])
     #cv.waitKey(0)
     
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     if check > 1:
         # Fire Detected From Thermal Camera
         FOVTHERMAL = 10
-        indcs = np.argwhere( frameThrm[ :, :,0] > 55 )
+        indcs = np.argwhere( frameThrm[ :, :,0] > 60 )
         columnMedian = [indcs[len(indcs)//2][0],indcs[len(indcs)//2][1]]
         
         #cam_thrm.release()
@@ -71,12 +71,12 @@ if __name__ == '__main__':
             print(columnMedian[0] - frameThrm.shape[0]//2)
             print('aaaa')
             #cam_thrm = cv.VideoCapture(tonboThermal)
-            frame = cam_thrm.read()
+            frameThrm = cam_thrm.read()
             #im = ax.imshow(frame[:,:,0])
             
             
             #print(retThrm)
-            indcs = np.argwhere( frame[ :, :,0] > 55 )
+            indcs = np.argwhere( frameThrm[ :, :,0] > 60 )
             #columnMedian = [0,0]
             columnMedian = [indcs[len(indcs)//2][0],indcs[len(indcs)//2][1]]
             
@@ -87,26 +87,25 @@ if __name__ == '__main__':
                 whichTilt = tonby.getTiltPos()
                 tonby.setTiltPos( whichTilt + .5 )
                 time.sleep(.05)
-                tonby.stopAllAction()
+                #tonby.stopAllAction()
             elif (columnMedian[0] - 288)<-15 : 
-                print('ccc') 
+                print('cccc') 
                 whichTilt = tonby.getTiltPos()
                 tonby.setTiltPos( whichTilt - .5 )  
                 time.sleep(.05)
             
             if (columnMedian[1] - frameThrm.shape[1]//2)>15 :
-                print('bbbb')              
+                print('dddd')              
                 whichPan = tonby.getPanPos()
                 tonby.setPanPos( whichPan - .5 )
                 time.sleep(.05)
-                tonby.stopAllAction()
+                #tonby.stopAllAction()
             elif (columnMedian[1] - frameThrm.shape[1]//2)<-15 : 
-                print('ccc') 
+                print('eeee') 
                 whichPan = tonby.getPanPos()
                 tonby.setPanPos( whichPan + .5 )  
                 time.sleep(.05)
 
-            
             
             tonby.stopAllAction()
             #cam_thrm.release()

@@ -1,4 +1,5 @@
 import threading, queue, time
+import cv2 as cv
 
 # bufferless VideoCapture
 class VideoCapture:
