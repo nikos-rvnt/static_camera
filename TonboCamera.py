@@ -15,6 +15,7 @@ class Tonbo():
 		#self.setThermalZoom(Zoom)
 		self.setThermalBrightness(0x7) # brghtns
 		self.setThermalGain(0x16) # highest gain contrast
+		#self.setThermalGain(0x26)
 		#self.setThermalFocusFar()
 		
 		self.initTheta = initTheta

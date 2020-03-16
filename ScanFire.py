@@ -4,12 +4,13 @@ import numpy as np
 import time
 import TonboCamera
 import alarmRequests
-
+import coordError
 
 def StaticScan():
 
 	camPositions = list(range( 52, 0,-5)) + list(range(360-5,280,-5)) + list(range(285,360,5)) + list(range(5,52,5))
 	camPositions = camPositions = [ camPositions[i]%360 for i in range(len(camPositions)) ]
+	camPositions = [34]
 	camPos_indx = 0
 	cam_thrm = cv.VideoCapture("rtsp://192.168.2.233:8555/video1")
 	#cam_thrm = cv.VideoCapture(0)
@@ -27,28 +28,14 @@ def StaticScan():
 		
 		for i in range(NumFramesPerPosition):
 			retThrm, frameThrm = cam_thrm.read()
-			check = np.sum(frameThrm[50:500,50:650] > 250)
+			check = np.sum(frameThrm[50:500,50:650] > 240)
+			print(check)
 			
 			if check > 15:
 				# Fire Detected From Thermal Camera
-				FOVTHERMAL = 10
-				indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
-				columnMedian = indcs[indcs.shape[0]//2][0]
-				
-				while np.abs(columnMedian[0] - frameThrm.shape[0]//2)>20:
-					if columnMedian[0] - frameThrm.shape[0]//2>0:
-						Tonbo.setTiltPos( Tonbo.getTiltPos() - 1 )
-					else:
-						Tonbo.setTiltPos( Tonbo.getTiltPos() + 1 )
-				
-				while np.abs(columnMedian[1] - frameThrm.shape[1]//2)>20:
-					if columnMedian[1] - frameThrm.shape[1]//2>0:
-						Tonbo.setPanPos( (Tonbo.getPanPos() - 1)%360 )
-					else:
-						Tonbo.setPanPos( (Tonbo.getPanPos() + 1)%360 )
-				
-				indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
-				columnMedian = indcs[indcs.shape[0]//2][0]
+				#FOVTHERMAL = 10
+				#indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
+				#columnMedian = indcs[indcs.shape[0]//2][0]
 				
 				#Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
 				Lat, Long = Tonbo.getCoordinates( 1, Tonbo.getPanPos())
@@ -68,7 +55,7 @@ def UAVScan():
 	while 1:
 		
 		retQuad, frmQuad = cam_quad.read()
-		qq = (np.sum((frmQuad[:,:,2].astype(int)-frmQuad[:,:,1].astype(int))>50))
+		qq = (np.sum((frmQuad[:,:,2].astype(int)-frmQuad[:,:,1].astype(int))>75))
 		if qq:
 			cntDetected +=1
 		
@@ -76,14 +63,14 @@ def UAVScan():
 			quadCoords = alarmRequests.getQuadCoords()
 			latQuad = float(quadCoords[0])
 			longQuad = float(quadCoords[1])
-			absAltQuad = float(quadCoords[2])
+			#absAltQuad = float(quadCoords[2])
 			cv.imwrite( '/home/theasis/software/static_cam/fireFrame.jpg', frmQuad)
 			print("Validated...")
-			return True, latQuad, longQuad, absAltQuad
+			return True, latQuad, longQuad
 	
 	cam_quad.release()
 	# if break while loop
-	return False, -1, -1, -1
+	return False, -1, -1
 
 
 def checkIfDroneIsHome():
@@ -111,15 +98,15 @@ if __name__ == '__main__':
 
 	FireDetected, Lat, Long = StaticScan()
 
-	if FireDetected and checkIfDroneIsHome():
-
+	#if FireDetected and checkIfDroneIsHome():
+	if FireDetected:
 		alarmRequests.newAlarm( Lat, Long)
 		time.sleep(5)
-		FireValidated, latQuad, longQuad, absAltQuad = UAVScan()
+		FireValidated, latQuad, longQuad = UAVScan()
 		if FireValidated:
 			alarmRequests.validateAlarm( latQuad, longQuad)
-			worstErr = coordsError.coordsError( absAltQuad, 45*np.pi/180)
-			print("Worst estimated error - X:" + str(worstErr[0]) + " Y: " + str(worstErr[1]))
+			#worstErr = coordError.coordError( 60, 45*np.pi/180)
+			#print("Worst estimated error - X:" + str(worstErr[0]) + " Y: " + str(worstErr[1]))
 		else:
 			print("Not Validated")
 		alarmRequests.deleteAlarm()

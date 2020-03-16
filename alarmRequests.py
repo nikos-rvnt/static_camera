@@ -27,7 +27,7 @@ def getQuadCoords():
     URL = "http://localhost:3000/quad_latest_data"
     r = requests.get(url = URL)
     jsonObj = r.json()
-    return [jsonObj["lat"], jsonObj["lon"], jsonObj["absAlt"]]
+    return [jsonObj["lat"], jsonObj["lon"]]
 
 
 def validateAlarm( latitude, longitude):
