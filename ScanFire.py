@@ -1,4 +1,4 @@
-
+import buferlessVideoCapture
 import cv2 as cv
 import numpy as np
 import time
@@ -7,14 +7,15 @@ import alarmRequests
 import coordError
 
 def StaticScan():
-
+	StaticThermalThreshold = 240
+	NumberExceededThreshold = 15
 	camPositions = list(range( 52, 0,-5)) + list(range(360-5,280,-5)) + list(range(285,360,5)) + list(range(5,52,5))
 	camPositions = camPositions = [ camPositions[i]%360 for i in range(len(camPositions)) ]
-	camPositions = [34]
+	#camPositions = [34]
 	camPos_indx = 0
-	cam_thrm = cv.VideoCapture("rtsp://192.168.2.233:8555/video1")
+	cam_thrm = buferlessVideoCapture.VideoCapture("rtsp://192.168.2.233:8555/video1")
 	#cam_thrm = cv.VideoCapture(0)
-	Tonbo = TonboCamera.Tonbo()
+	Tonbo = TonboCamera.Tonbo(Brightness = 7, Gain = 10)
 	
 	NumFramesPerPosition = 300
 	# Scan
@@ -22,20 +23,20 @@ def StaticScan():
 		
 		Tonbo.setPanPos(camPositions[camPos_indx])
 		camPos_indx = (camPos_indx + 1) % len(camPositions)
+		time.sleep(.5)
+		Tonbo.setTiltPos(4)
 		time.sleep(1)
-		Tonbo.setTiltPos(5)
-		time.sleep(3)
 		
 		for i in range(NumFramesPerPosition):
 			retThrm, frameThrm = cam_thrm.read()
-			check = np.sum(frameThrm[50:500,50:650] > 240)
-			print(check)
+			check = np.sum(frameThrm[50:500,50:650] > StaticThermalThreshold)
+			#print(check)
 			
-			if check > 15:
+			if check > NumberExceededThreshold:
 				# Fire Detected From Thermal Camera
-				#FOVTHERMAL = 10
-				#indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
-				#columnMedian = indcs[indcs.shape[0]//2][0]
+				FOVTHERMAL = 10
+				indcs = np.argwhere( frameThrm[frameThrm.shape[0]//2,50:650] > 250 )
+				columnMedian = indcs[indcs.shape[0]//2][0]
 				
 				#Lat, Long = Tonbo.getCoordinates( 1, (Tonbo.getPanPos() + FOVTHERMAL*(360 - columnMedian)/(670 - 25))%360)
 				Lat, Long = Tonbo.getCoordinates( 1, Tonbo.getPanPos())
