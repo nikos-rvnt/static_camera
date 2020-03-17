@@ -52,22 +52,22 @@ Open up a terminal and type:
   - ffplay "rtmp://127.0.0.1:1935/live/quad" 
   
 ### To record video stream via ffmpeg:
- Tonbo Static Camera:
-    (optical cam): ffmpeg -i rtsp://192.168.2.233:8554/video0 -vcodec copy -acodec copy staticOptical_video.mp4
-    (thermal cam): ffmpeg -i rtsp://192.168.2.233:8555/video1 -vcodec copy -acodec copy staticThermal_video.mp4   
+ - Tonbo Static Camera:
+    - (optical cam): ffmpeg -i rtsp://192.168.2.233:8554/video0 -vcodec copy -acodec copy staticOptical_video.mp4
+    - (thermal cam): ffmpeg -i rtsp://192.168.2.233:8555/video1 -vcodec copy -acodec copy staticThermal_video.mp4   
   
- DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
-    ffmpeg -i rtmp://127.0.0.1:1935/live/quad -vcodec copy -acodec copy quadStream_video.mp4
+  - DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
+    - ffmpeg -i rtmp://127.0.0.1:1935/live/quad -vcodec copy -acodec copy quadStream_video.mp4
  
- - Video stream recording can be also done from another PC connected to Theasis hotspot. In that case, the video source should be changed to:
+Video stream recording can be also done from another PC connected to Theasis hotspot. In that case, the video source should be changed to:
  
-  Tonbo Static Camera:
+  - Tonbo Static Camera:
     * (optical cam): ffmpeg -i rtsp://192.168.2.100:8554/video0 -vcodec copy -acodec copy staticOptical_video.mp4
     * (thermal cam): ffmpeg -i rtsp://192.168.2.100:8555/video1 -vcodec copy -acodec copy staticThermal_video.mp4   
     * ffmpeg -i rtmp://192.168.2.100:1935/live/camera -vcodec copy -acodec copy staticStream_video.mp4
     (the third case works for sure, but only the static camera video source that is displayed from the UI (http://www.localhost:1234/) can be recorded)
   
-  DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
+  - DJI Quadcopter (only thermal camera signal is transmitted and stream is enabled when quadcopter is on mission):
     * ffmpeg -i rtmp://192.168.2.100:1935/live/quad -vcodec copy -acodec copy quadStream_video.mp4
     
 ### To record video stream via VLC:
