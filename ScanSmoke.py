@@ -17,7 +17,7 @@ def StaticScan():
 		#Tonbo.setTiltPos(4)
 		time.sleep(3)
 		
-		SmokeDetected, displacement = SmokeDetector(CamOptical = CamOptical, Level = 1)
+		SmokeDetected, displacement = SmokeDetector(CamObjects = (CamOptical,), Level = 1)
 		if SmokeDetected:
 			newPan = (Tonbo.getPanPos() - displacement) % 360
 			time.sleep(1)
@@ -29,11 +29,11 @@ def StaticScan():
 	# if break while loop
 	return False, -1, -1
 
-def SmokeDetector(CamOptical, useThermal , NumFramesPerPosition = int(300 / 5), StaticOpticalThreshold = 1/3,
+def SmokeDetector(CamObjects, useThermal , NumFramesPerPosition = int(300 / 5), StaticOpticalThreshold = 1/3,
 				NumberExceededThreshold = 100, MaskExclude = 1, Display = False):
 		"""
 		Function to detect smoke using only optical or both optical and thermal static cameras
-		:params	CamOptical: buferlessVideoCapture object to read optical video
+		:params	CamObjects: buferlessVideoCapture object to read optical and Thermal (if Level == 2) video
 				useThermal: If True function uses also thermal camera to distinct Smoke from other moving objects
 				NumFramesPerPosition: Number of frames to be processed using frames dropping,  total time = NumFramesPerPosition / SubsenseFPS
 				StaticOpticalThreshold: Rate of frames needed for each pixel to be detected as moving object
@@ -49,24 +49,44 @@ def SmokeDetector(CamOptical, useThermal , NumFramesPerPosition = int(300 / 5), 
 		import Subsense
 
 		MaskExclude = np.dstack((MaskExclude,MaskExclude,MaskExclude))
-		BGS = Subsense.Lobster(lbsp_thresh = .15, num_samples_for_moving_avg = 2, num_bg_samples = 5)
+		if Level == 1:
+			BGS_Optical = Subsense.Lobster(lbsp_thresh = .15, num_samples_for_moving_avg = 2, num_bg_samples = 5)
+			CamOptical, = CamObjects
+		elif Level == 2:
+			BGS_Optical = Subsense.Lobster(lbsp_thresh = .15, num_samples_for_moving_avg = 2, num_bg_samples = 5)
+			BGS_Thermal = Subsense.Lobster(lbsp_thresh = .05, num_samples_for_moving_avg = 2, min_color_dist_thresh = 10)
+			CamOptical, CamThermal = CamObjects
+			kernel = np.ones((40,30),np.uint8)
+			T = np.float32([[0.9557, 0.0369, -1.4987], [-0.0235, 0.8806, 44.2869]])
+		
+		SumThermal = np.zeros((576,720))
 		SumOptical = np.zeros((576, 720))
 		for i in range(NumFramesPerPosition):
+			# Optical Foreground
 			FrameOptical = CamOptical.read()
 			FrameOptical = FrameOptical * MaskExclude
-			FG_Optical=BGS.apply(np.uint8(FrameOptical))
+			FG_Optical = BGS_Optical.apply(np.uint8(FrameOptical))
 
-			#if (np.sum(FG_Optical/255) > 0.01*(576*720)):
-				#FG_Optical = 0*FG_Optical
+			# Thermal Foreground
+			if Level == 2:
+				FrameThermal = CamThermal.read()
+				FG_Thermal = BGS_Thermal.apply(np.uint8(FrameThermal))
+				FG_Optical = cv2.warpAffine(FG_Optical, T,(720,576))
+				SumThermal = SumThermal + cv2.dilate(FG_Thermal, kernel,iterations = 1) / 255
+			
+			SumOptical = SumOptical + FG_Optical / 255
+			
 			if Display:
 				FG_Mask3D = np.dstack((FG_Optical, FG_Optical, FG_Optical)
 				cv2.imshow('Optical Mask', (FG_Mask3D == 0) * FrameOptical)
 				cv2.waitKey(1)
-
-			SumOptical = SumOptical + FG_Optical / 255
-
+				if Level == 2:
+					FG_Mask3D = np.dstack((FG_Thermal, FG_Thermal, FG_Thermal)
+					cv2.imshow('Thermal Mask', (FG_Mask3D == 0) * FrameThermal)
+					cv2.waitKey(1)
+	
+		check = np.sum((SumOptical - SumThermal) > NumFramesPerPosition * StaticOpticalThreshold)		
 		
-		check = np.sum(SumOptical > NumFramesPerPosition * StaticOpticalThreshold)
 		if check > NumberExceededThreshold:
 			corr = np.median(np.argwhere(SumOptical > NumFramesPerPosition * StaticOpticalThreshold),axis = 0)[1]
 			displacement = Tonbo.OPTICALFOV * (corr - Tonbo.OPTICALCPOINT[1])/660 
@@ -75,16 +95,19 @@ def SmokeDetector(CamOptical, useThermal , NumFramesPerPosition = int(300 / 5), 
 			return True, displacement
 
 		cv2.destroyAllWindows()
-		BGS.release()
+		BGS_Optical.release()
+		BGS_Thermal.release()
 		return False, 0
 
 
 if __name__ == '__main__':
     
-
 	SmokeDetected, Lat, Long = StaticScan()
 	if SmokeDetected:
 		print(" Smoke Detected.....!!")
 		alarmRequests.newAlarm( Lat, Long)
 		time.sleep(5)
 		
+
+#if (np.sum(FG_Optical/255) > 0.01*(576*720)):
+				#FG_Optical = 0*FG_Optical
