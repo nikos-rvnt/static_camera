@@ -10,6 +10,7 @@ Open up a terminal and type:
 4) ./Init2.sh - to start Node.js server application
 5) ./Init3.sh - to run websocket_client
 6) ./Init4.sh - to run algorithm for smoke/fire detection from static camera and drone thermal camera stream
+7) ./Init5.sh - to display Optical Thermal and UAV camera's feed
 
 ( if any of the above is not executable, you can force it to be by typing "sudo chmod +777 /path/to/file.extension" )
 
