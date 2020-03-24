@@ -7,7 +7,7 @@ from ScanFire import *
 
 
 
-def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPositionOptical = int(300 / 5)):
+def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPositionOptical = int(300 / 5), DisplayResults = True):
 	"""
 	Function to scann jointly for Fire and Smoke using optical and thermal static camera
 	Scanning Strategy: Check for fire for every position using thermal camera, check for smoke every 5 positions. 
@@ -36,7 +36,7 @@ def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPosition
 		camPos_indx = (camPos_indx + 1) % len(camPositions)
 		time.sleep(1)
 
-		FireDetected, displacement =  FireDetector(CamThermal, NumFramesPerPosition = NumFramesPerPositionThermal)
+		FireDetected, displacement =  FireDetector(CamThermal, NumFramesPerPosition = NumFramesPerPositionThermal, Display = DisplayResults)
 		if FireDetected:
 			newPan = (Tonbo.getPanPos() - displacement) % 360
 			time.sleep(1)
@@ -45,8 +45,9 @@ def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPosition
 			return True, Lat, Long, "Fire"
 		
 		if camPos_indx % 5 == 0:
-			SmokeDetectedL1, displacement = SmokeDetector(CamObjects = (CamOptical,), Level = 1, NumFramesPerPosition = NumFramesPerPositionOptical)
+			SmokeDetectedL1, corr = SmokeDetector(CamObjects = (CamOptical,), Level = 1, NumFramesPerPosition = NumFramesPerPositionOptical, Display = DisplayResults)
 			if SmokeDetectedL1:
+				displacement = Tonbo.OPTICALFOV[TonboParams['L1']['Zoom']][1] * (corr - Tonbo.OPTICALCPOINT[TonboParams['L1']['Zoom']][1])/660 
 				newPan = (Tonbo.getPanPos() - displacement) % 360
 				time.sleep(1)
 				Tonbo.setPanPos(newPan)
@@ -55,8 +56,9 @@ def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPosition
 				Tonbo.setThermalGain(TonboParams['L2']['Gain'])
 				Tonbo.setThermalBrightness(TonboParams['L2']['Brightness'])
 
-				SmokeDetectedL2, displacement = SmokeDetector(CamObjects = (CamOptical, CamThermal), Level = 2, NumFramesPerPosition = NumFramesPerPositionOptical) 
+				SmokeDetectedL2, corr = SmokeDetector(CamObjects = (CamOptical, CamThermal), Level = 2, NumFramesPerPosition = NumFramesPerPositionOptical, Display = DisplayResults) 
 				if SmokeDetectedL2:
+					displacement = Tonbo.OPTICALFOV[TonboParams['L2']['Zoom']][1] * (corr - Tonbo.OPTICALCPOINT[TonboParams['L2']['Zoom']][1])/660 
 					newPan = (Tonbo.getPanPos() - displacement) % 360
 					time.sleep(1)
 					Lat, Long = Tonbo.getCoordinates( 1, newPan)
@@ -76,7 +78,7 @@ def JoinScan(TonboParams, NumFramesPerPositionThermal = 50, NumFramesPerPosition
 
 if __name__ == '__main__':
 	TonboParams = {'L1' : {'Zoom' : 2, 'Brightness' : 0x7, 'Gain' : 0x16}, 'L2': {'Zoom' : 8, 'Brightness' : 0x7, 'Gain' : 0x16}}
-	Detected, Lat, Long, D = JoinScan()
+	Detected, Lat, Long, D = JoinScan(TonboParams)
 
 	#if FireDetected and checkIfDroneIsHome():
 	if Detected:

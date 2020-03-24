@@ -1,5 +1,5 @@
 import buferlessVideoCapture
-import cv2 as cv
+import cv2
 import numpy as np
 import time
 import TonboCamera
@@ -26,7 +26,7 @@ def StaticScan():
 		time.sleep(1)
 		#Tonbo.setTiltPos(4.5)
 		#time.sleep(1)
-		FireDetected, displacement = FireDetector(CamThermal)
+		FireDetected, displacement = FireDetector(CamThermal, Display = True)
 		if FireDetected:
 			# Move Camera In Center of Detection
 			newPan = (Tonbo.getPanPos() - displacement) % 360
@@ -43,7 +43,7 @@ def StaticScan():
 
 def FireDetector(CamThermal, NumFramesPerPosition = 50, StaticThermalThreshold = 250,
 				 NumberExceededThreshold = 25, MaskExclude = 1, Display = False):
-		"""
+	"""
 		Function to detect fire using only thermal camera based on thresholding image's intesity
 		:params	CamThermal: buferlessVideoCapture object to read thermal video
 				NumFramesPerPosition: Number of frames to be processed
@@ -53,7 +53,7 @@ def FireDetector(CamThermal, NumFramesPerPosition = 50, StaticThermalThreshold =
 				Display: If True displays thermal image
 		:return	Detected: True if fire detected
 				displacement: Pan adjustment needed for fire centering
-		"""
+    """
 	import cv2
 	MaskExclude = np.dstack((MaskExclude,MaskExclude,MaskExclude))
 	for i in range(NumFramesPerPosition):
@@ -62,8 +62,8 @@ def FireDetector(CamThermal, NumFramesPerPosition = 50, StaticThermalThreshold =
 		check = np.sum(frameThrm[ :, :,0] > StaticThermalThreshold)
 		#print(check)
 		if Display:
-			cv.imshow('Thermal', frameThrm)
-			cv.waitKey(1)
+			cv2.imshow('Thermal', np.uint8(frameThrm))
+			cv2.waitKey(1)
 		if check > NumberExceededThreshold:
 			print("Detected") 
 			time.sleep(1)
@@ -85,7 +85,7 @@ def UAVScan(RGDiff = 75, FramesCount = 5):
 	:return	Detected: True if fire detected
 			latQuad, longQuad : Coordinates of fire detection
 	"""
-	cam_quad = cv.VideoCapture("rtmp://127.0.0.1:1935/live/quad")
+	cam_quad = cv2.VideoCapture("rtmp://127.0.0.1:1935/live/quad")
 	cntDetected = 0
 	while 1:
 		
@@ -102,7 +102,7 @@ def UAVScan(RGDiff = 75, FramesCount = 5):
 			latQuad = float(quadCoords[0])
 			longQuad = float(quadCoords[1])
 			#absAltQuad = float(quadCoords[2])
-			cv.imwrite( '/home/theasis/software/static_cam/fireFrame.jpg', frmQuad)
+			cv2.imwrite( '/home/theasis/software/static_cam/fireFrame.jpg', frmQuad)
 			print("Validated...")
 			return True, latQuad, longQuad
 	

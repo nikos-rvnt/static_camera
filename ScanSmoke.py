@@ -17,8 +17,9 @@ def StaticScan():
 		#Tonbo.setTiltPos(4)
 		time.sleep(3)
 		
-		SmokeDetected, displacement = SmokeDetector(CamObjects = (CamOptical,), Level = 1)
+		SmokeDetected, corr = SmokeDetector(CamObjects = (CamOptical,), Level = 1, Display = True)
 		if SmokeDetected:
+			displacement = Tonbo.OPTICALFOV[2][1] * (corr - Tonbo.OPTICALCPOINT[2][1])/660 
 			newPan = (Tonbo.getPanPos() - displacement) % 360
 			time.sleep(1)
 			Lat, Long = Tonbo.getCoordinates( 1, newPan)
@@ -29,7 +30,7 @@ def StaticScan():
 	# if break while loop
 	return False, -1, -1
 
-def SmokeDetector(CamObjects, useThermal , NumFramesPerPosition = int(300 / 5), StaticOpticalThreshold = 1/3,
+def SmokeDetector(CamObjects, Level , NumFramesPerPosition = int(300 / 5), StaticOpticalThreshold = 1/3,
 				NumberExceededThreshold = 100, MaskExclude = 1, Display = False):
 		"""
 		Function to detect smoke using only optical or both optical and thermal static cameras
@@ -77,26 +78,26 @@ def SmokeDetector(CamObjects, useThermal , NumFramesPerPosition = int(300 / 5), 
 			SumOptical = SumOptical + FG_Optical / 255
 			
 			if Display:
-				FG_Mask3D = np.dstack((FG_Optical, FG_Optical, FG_Optical)
-				cv2.imshow('Optical Mask', (FG_Mask3D == 0) * FrameOptical)
+				FG_Mask3D = np.dstack((FG_Optical, FG_Optical, FG_Optical))
+				cv2.imshow('Optical Mask', np.uint8((FG_Mask3D == 0) * FrameOptical))
 				cv2.waitKey(1)
 				if Level == 2:
-					FG_Mask3D = np.dstack((FG_Thermal, FG_Thermal, FG_Thermal)
-					cv2.imshow('Thermal Mask', (FG_Mask3D == 0) * FrameThermal)
+					FG_Mask3D = np.dstack((FG_Thermal, FG_Thermal, FG_Thermal))
+					cv2.imshow('Thermal Mask', np.uint8((FG_Mask3D == 0) * FrameThermal))
 					cv2.waitKey(1)
 	
 		check = np.sum((SumOptical - SumThermal) > NumFramesPerPosition * StaticOpticalThreshold)		
 		
 		if check > NumberExceededThreshold:
 			corr = np.median(np.argwhere(SumOptical > NumFramesPerPosition * StaticOpticalThreshold),axis = 0)[1]
-			displacement = Tonbo.OPTICALFOV * (corr - Tonbo.OPTICALCPOINT[1])/660 
 			print("Smoke.............")
 			# Stop Scanning
-			return True, displacement
+			return True, corr
 
 		cv2.destroyAllWindows()
 		BGS_Optical.release()
-		BGS_Thermal.release()
+		if Level == 2:
+			BGS_Thermal.release()
 		return False, 0
 
 
