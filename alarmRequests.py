@@ -50,11 +50,16 @@ def deleteAlarm():
     
     return r
 
-
+def falseAlarm():
+    URL = "http://localhost:3000/unvalidate_alarm"
+    r = requests.get( url = URL)
+    
+    return r
+    
 # epistrefei energous "synagermous"
 def getActiveAlarm():
     
-    URL = "http://localhost:3000/unvalidated_alarms"
+    URL = "http://localhost:3000/active_alarm"
     r = requests.get(url = URL)
     jsonObj = r.json()
     
